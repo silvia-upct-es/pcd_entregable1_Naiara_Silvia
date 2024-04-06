@@ -1,10 +1,10 @@
-# Versión 7
+# Versión 8
 
-# Añadimos las clases anteriores al mismo fichero en el que está la universidad.
-# Tambíen añadimos algunos métodos adicionales que conviene tener en esta calse en el contexto de la universidad.
+# Clases para crear objetos génericos que valen para cualquier universidad.
+# Operaciones y restricciones básicas que aplican a todos los casos.
 
 class Persona:
-    def __init__(self, nombre, apellidos, DNI, direccion, sexo): # Añadimos atributos de apellidos a la clase persona porque más adelante los utilizaremos para el método de búsqueda.
+    def __init__(self, nombre, apellidos, DNI, direccion, sexo):
         self.nombre = nombre
         self.apellidos = apellidos
         self.DNI = DNI
@@ -13,6 +13,7 @@ class Persona:
 
     def __str__(self):
         return f"Nombre: {self.nombre} \nDNI: {self.DNI} \nDirección: {self.direccion} \nSexo: {self.sexo}"
+
 
 class Asignatura:
     def __init__(self, nombre, codigo, creditos, curso):
@@ -24,10 +25,11 @@ class Asignatura:
     def __str__(self):
         return f"Asignatura: {self.nombre} \nCódigo: {self.codigo} \nCréditos: {self.creditos} \nCurso: {self.curso}"
 
+
 class Profesor(Persona):
     def __init__(self, nombre, apellidos, DNI, direccion, sexo, departamento):
         super().__init__(nombre, apellidos, DNI, direccion, sexo)
-        self.asignaturas_impartidas = set() # Cambio de lista a set para que no aparezcan elementos repetidos si imparten una asignatura dos veces sin querer.
+        self.asignaturas_impartidas = set()
         self.departamento = departamento
     
     def impartir_asignatura(self, asignatura):
@@ -46,6 +48,7 @@ class Profesor(Persona):
         asignaturas = ', '.join([asig.nombre for asig in self.asignaturas_impartidas])
         return f"Profesor: {self.nombre} \nDNI: {self.DNI} \nDirección: {self.direccion} \nSexo: {self.sexo} \nDepartamento: {self.departamento} \nAsignaturas impartidas: {asignaturas}"
 
+
 class ProfesorAsociado(Profesor):
     def __init__(self, nombre, apellidos, DNI, direccion, sexo, departamento):
         super().__init__(nombre, apellidos, DNI, direccion, sexo, departamento)
@@ -53,6 +56,7 @@ class ProfesorAsociado(Profesor):
     def __str__(self):
         asignaturas = ', '.join([asig.nombre for asig in self.asignaturas_impartidas])
         return f"Profesor Asociado: {self.nombre} \nDNI: {self.DNI} \nDirección: {self.direccion} \nSexo: {self.sexo} \nDepartamento: {self.departamento} \nAsignaturas impartidas: {asignaturas}"
+
 
 class ProfesorTitular(Profesor):
     def __init__(self, nombre, apellidos, DNI, direccion, sexo, departamento, area_investigador):
@@ -62,6 +66,7 @@ class ProfesorTitular(Profesor):
     def __str__(self):
         asignaturas = ', '.join([asig.nombre for asig in self.asignaturas_impartidas])
         return f"Profesor Titular: {self.nombre} \nDNI: {self.DNI} \nDirección: {self.direccion} \nSexo: {self.sexo} \nDepartamento: {self.departamento} \nÁrea de Investigación: {self.area_investigador} \nAsignaturas impartidas: {asignaturas}"
+
 
 class Estudiante(Persona):
     def __init__(self, nombre, apellidos, DNI, direccion, sexo):
@@ -82,11 +87,9 @@ class Estudiante(Persona):
         return f"Estudiante: {self.nombre} \nDNI: {self.DNI} \nDirección: {self.direccion} \nSexo: {self.sexo} \nAsignaturas Matriculadas: {asignaturas}"
 
 
-
-
 class Universidad:
     def __init__(self, nombre):
-        self.nombre = nombre # Añadimos el atributo de nombre a la universidad para distinguirla de otras.
+        self.nombre = nombre
         self.asignaturas = []
         self.profesores = []
         self.estudiantes = []
@@ -101,25 +104,23 @@ class Universidad:
                f"Número de asignaturas: {len(self.asignaturas)}\n" \
                f"{self.asignaturas}\n" \
                f"Departamentos: {self.departamentos}\n"
-
+               
     def crear_profesor(self, nombre, apellidos, DNI, direccion, sexo, departamento, area_investigador=None):
         # Verificar si el profesor ya existe con el mismo DNI.
         if any(profesor.DNI == DNI for profesor in self.profesores):
-            print("Ya existe un profesor con este DNI.") # De momento esta como print, luego en las siguientes versiones se cambiará a un raise.
-            return None
+            raise ValueError ("Ya existe un profesor con este DNI.")
         else:
             if area_investigador:
                 profesor = ProfesorTitular(nombre, apellidos, DNI, direccion, sexo, departamento, area_investigador) 
             else:
-                profesor = ProfesorAsociado(nombre, DNI, direccion, sexo, departamento)
+                profesor = ProfesorAsociado(nombre, apellidos, DNI, direccion, sexo, departamento)
             self.profesores.append(profesor)
             return profesor
 
     def crear_estudiante(self, nombre, apellidos, DNI, direccion, sexo):
         # Verificar si el estudiante ya existe con el mismo DNI.
         if any(estudiante.DNI == DNI for estudiante in self.estudiantes):
-            print("Ya existe un estudiante con este DNI.")
-            return None
+            raise ValueError ("Ya existe un estudiante con este DNI.")
         else:
             estudiante = Estudiante(nombre, apellidos, DNI, direccion, sexo)
             self.estudiantes.append(estudiante)
@@ -128,8 +129,7 @@ class Universidad:
     def crear_asignatura(self, nombre, codigo, creditos, curso):
         # Verificar si la asignatura ya existe con el mismo código o nombre.
         if any(asignatura.codigo == codigo for asignatura in self.asignaturas) or any(asignatura.nombre == nombre for asignatura in self.asignaturas):
-            print("Ya existe una asignatura con este código o nombre.")
-            return None
+            raise ValueError ("Ya existe una asignatura con este código o nombre.")
         else:
             asignatura = Asignatura(nombre, codigo, creditos, curso)
             self.asignaturas.append(asignatura)
@@ -139,19 +139,19 @@ class Universidad:
         if profesor in self.profesores:
             self.profesores.remove(profesor)
         else:
-            print("El profesor no existe en la universidad.")
+            raise ValueError ("El profesor no existe en la universidad.")
 
     def eliminar_estudiante(self, estudiante):
         if estudiante in self.estudiantes:
             self.estudiantes.remove(estudiante)
         else:
-            print("El estudiante no existe en la universidad.")
+            raise ValueError ("El estudiante no existe en la universidad.")
 
     def eliminar_asignatura(self, asignatura):
         if asignatura in self.asignaturas:
             self.asignaturas.remove(asignatura)
         else:
-            print("La asignatura no existe en la universidad.")
+            raise ValueError ("La asignatura no existe en la universidad.")
 
     def mostrar_profesores(self):
         print("Profesores:")
@@ -210,7 +210,7 @@ class Universidad:
         else:
             raise ValueError("No se encontraron asignaturas con los atributos dados.")
         
-    def buscar_estudiante(self, **kwargs): # Es practucamente igual con estudiante.
+    def buscar_estudiante(self, **kwargs):
         """
         Busca un estudiante en la universidad según los atributos dados.
         Los atributos permitidos son 'nombre', 'apellidos', 'DNI', 'direccion' y 'sexo'.
@@ -229,11 +229,37 @@ class Universidad:
             for estudiante in resultados:
                 print(estudiante)
         else:
-            print("No se encontraron estudiantes con los atributos dados.")
+            raise ValueError ("No se encontraron estudiantes con los atributos dados.")
 
-    def buscar_profesor():
-        pass # Lo definiermos en las versiones siguientes porque queremos ser capaces de filtrar también por areas de investigación.
- 
+    def buscar_profesor(self, **kwargs):
+        """
+        Busca un profesor en la universidad según los atributos dados.
+        Los atributos permitidos son 'nombre', 'apellidos', 'DNI', 'direccion', 'sexo', 'departamento' y 'area_investigador'.
+        """
+        resultados = []
+        for profesor in self.profesores:
+            coincide = True
+            for key, value in kwargs.items():
+                if key == 'area_investigador':
+                    # Verificar si el profesor tiene área de investigación y si coincide con el valor dado.
+                    if not hasattr(profesor, 'area_investigador') or getattr(profesor, 'area_investigador') != value:
+                        coincide = False
+                        break
+                elif getattr(profesor, key, None) != value:
+                    coincide = False
+                    break
+            if coincide:
+                resultados.append(profesor)
+        if resultados:
+            print("Profesores encontrados:")
+            for profesor in resultados:
+                print(profesor)
+        else:
+           raise ValueError ("No se encontraron profesores con los atributos dados.")
+    
+# La restriccion de que solo se pueda meter una asignatura pra impartir o matricular si existe en la universidad
+# la añadimos aqui y no en la clase de profesir y alumno porque en ellas no tenemos disposicion de la lista total de asignaturas
+# de la que si disponemos en la clase universidad.
     def matricular_asignatura(self, alumno, asignatura):
         """
         Matricula a un alumno en una asignatura si la asignatura existe en la lista de asignaturas de la universidad.
@@ -243,10 +269,9 @@ class Universidad:
             - asignatura (Asignatura): Objeto Asignatura en la cual matricular al alumno.
         """
         if asignatura in self.asignaturas:
-            alumno.agregar_asignatura_matriculada(asignatura) # Usamos el método de la clase de estudiante.
-            print(f"{alumno.nombre} matriculado en {asignatura.nombre}.")
+            alumno.agregar_asignatura_matriculada(asignatura)
         else:
-            print(f"La asignatura {asignatura.nombre} no existe en la universidad.")
+            raise ValueError (f"La asignatura {asignatura.nombre} no existe en la universidad.")
 
     def desmatricular_asignatura(self, alumno, asignatura):
         """
@@ -256,7 +281,7 @@ class Universidad:
             - alumno (Estudiante): Objeto Estudiante a desmatricular.
             - asignatura (Asignatura): Objeto Asignatura de la cual desmatricular al alumno.
         """
-        alumno.eliminar_asignatura_matriculada(asignatura) # Usamos el método de la clase de estudiante.
+        alumno.eliminar_asignatura_matriculada(asignatura)
 
     def impartir_asignatura(self, profesor, asignatura):
         """
@@ -267,10 +292,9 @@ class Universidad:
             - asignatura (Asignatura): Objeto Asignatura que va a ser impartida por el profesor.
         """
         if asignatura in self.asignaturas:
-            profesor.impartir_asignatura(asignatura) # Usamos el método de la clase de profesor.
-            print(f"{profesor.nombre} imparte ahora {asignatura.nombre}.")
+            profesor.impartir_asignatura(asignatura)
         else:
-            print(f"La asignatura {asignatura.nombre} no existe en la universidad.")
+            raise ValueError (f"La asignatura {asignatura.nombre} no existe en la universidad.")
 
     def dejar_impartir_asignatura(self, profesor, asignatura):
         """
@@ -280,9 +304,9 @@ class Universidad:
             - profesor (Profesor): Objeto Profesor que dejará de impartir la asignatura.
             - asignatura (Asignatura): Objeto Asignatura que dejará de ser impartida por el profesor.
         """
-        profesor.dejar_impartir_asignatura(asignatura) # Usamos el método de la clase de profesor.
+        profesor.dejar_impartir_asignatura(asignatura)
 
-    def cambiar_departamento(self, profesor, nuevo_dep): # No verificamos que los departamentos sean válidos en el contexto de la universidad.
+    def cambiar_departamento(self, profesor, nuevo_dep):
         """
         Permite a un profesor cambiarse de departamento.
 
@@ -290,7 +314,10 @@ class Universidad:
             - profesor (Profesor): El objeto profesor que quiere cambiarse de departamento.
             - nuevo_dep (str): El nombre del nuevo departamento al cual se va a integrar el profesor.
         """
-        profesor.cambiar_departamento(nuevo_dep) # Usamos el método de la clase de profesor.
+        if nuevo_dep in self.departamentos:
+            profesor.cambiar_departamento(nuevo_dep)
+        else:
+            raise ValueError (f"El Departamento {nuevo_dep} no existe en esta Universidad.")
 
     def listar_imparticion(self, asignatura=None):
         """
@@ -300,12 +327,15 @@ class Universidad:
         Parámetros:
             - asignatura (Asignatura, opcional): Objeto Asignatura para filtrar los profesores que la imparten.
         """
-        if asignatura: # No verificamos si la asigantura existe, lo haremos en la siguiente versión.
-            print(f"Profesores que imparten {asignatura.nombre}:")
-            for profesor in self.profesores:
-                if asignatura in profesor.asignaturas_impartidas:
-                    print(profesor)
-        else: # Si no se da una asignatura, imprime todas las de todas los profesores.
+        if asignatura: #y si la asignatura no existe?
+            if asignatura in self.asignaturas:
+                print(f"Profesores que imparten {asignatura.nombre}:")
+                for profesor in self.profesores:
+                    if asignatura in profesor.asignaturas_impartidas:
+                        print(profesor)
+            else:
+                raise ValueError (f"La asignatura {asignatura} no existe.")
+        else:
             print("Listado de todas las asignaturas impartidas por cada profesor:")
             for profesor in self.profesores:
                 print(f"Profesor: {profesor.nombre}")
@@ -319,19 +349,34 @@ class Universidad:
         Parámetros:
             - asignatura (Asignatura): La asignatura para la cual se desea listar los estudiantes matriculados.
         """
-        # Aquí tampoco se verifica si la asignatura existe, mal, lo haremos en la siguiente.
-        print(f"Estudiantes matriculados en {asignatura.nombre}:")
-        for estudiante in self.estudiantes:
-            if asignatura in estudiante.asignaturas_matriculadas:
-                print(estudiante)
+        #y si la asignatura no existe?
+        if asignatura in self.asignaturas:
+            print(f"Estudiantes matriculados en {asignatura.nombre}:")
+            for estudiante in self.estudiantes:
+                if asignatura in estudiante.asignaturas_matriculadas:
+                    print(estudiante)
+        else:
+                raise ValueError (f"La asignatura {asignatura} no existe.")        
+
 
 # No hace falta una clase de departameto porqeu solamente existen 3 y no interesa crear ni eliminar ninguno de ellos, así mismo todos los profesores deben pertenecer a algún deparatamento
 # el cual se declara cuando se define el objeto profesor, y la unica forma en la que un profesor puede salir de un departamento es, 1) cambiando de deparatmento (debe pertenercer a 1)
 # 2) dejando de trabajar para la univerdidad, en cuyo caso se elimina direcatemte el objeto profesor
 # no necesitamos ningun otro metodo para departamento porqeu seria redundante.
-    def listar_miembros_departamento(self, departamento): # Desarrollaremos también este metodo en la siguiente versión.
-        pass
+    def listar_miembros_departamento(self, departamento):
+        """
+        Lista los miembros (profesores) de un departamento dado.
 
+        Parámetros:
+            - departamento (str): El nombre del departamento del cual se desean listar los miembros.
+        """
+        if departamento in self.departamentos: # Verificamos que el departamento insertado existe en la lista de la uni.
+            print(f"Miembros del departamento {departamento}:")
+            for profesor in self.profesores:
+                if profesor.departamento == departamento:
+                    print(f"{profesor.nombre} {profesor.apellidos}")
+        else:
+            raise ValueError (f"El departamento {departamento} no existe.")
 
 
 # Ejemplo de uso
@@ -360,13 +405,25 @@ universidad.eliminar_profesor(prof_titular)
 # Eliminar estudiante
 universidad.eliminar_estudiante(estudiante)
 
+
 # Mostrar listas
 universidad.mostrar_profesores()
 universidad.mostrar_estudiantes()
 universidad.mostrar_asignaturas()
 
-# Buscar asigantura
+
 universidad.buscar_asignatura(nombre="Matemáticas")
 universidad.buscar_asignatura(codigo=82345)
 universidad.buscar_asignatura(creditos=5)
 
+
+# Creamos algunos profesores para agregarlos a la lista de profesores de la universidad
+profesor1 = universidad.crear_profesor("Juan", "Perez", "12345678A", "Calle 123", "M", "DIIC", "Área de investigación 1")
+profesor2 = universidad.crear_profesor("María", "García", "87654321B", "Calle 456", "F", "DITEC", "Área de investigación 2")
+profesor3 = universidad.crear_profesor("Ana", "López", "98765432C", "Calle 789", "F", "DIIC")
+
+# Buscamos profesores que coincidan con ciertos atributos
+universidad.buscar_profesor(nombre="Juan", departamento="DIIC")
+universidad.buscar_profesor(sexo='F')
+
+universidad.listar_miembros_departamento("DIIC")
