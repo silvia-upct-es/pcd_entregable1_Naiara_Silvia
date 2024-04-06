@@ -1,6 +1,7 @@
-# Versión 4
+# Versión 5
 
-# En este hay restricciones de dominio en los depertamentos y métodos de str para imprimir por pantalla los objetos y verificar que lo que estamos haciando funciona.
+# En este partimos de que queremos un archivo genérico de la implementación, y que añadiremos las restricciones de dominio 
+# más adelante dependiendo de las necesidades de la entidad que utilice este cóidgo.
 
 class Persona:
     def __init__(self, nombre, DNI, direccion, sexo):
@@ -13,36 +14,33 @@ class Persona:
         return f"Nombre: {self.nombre} \nDNI: {self.DNI} \nDirección: {self.direccion} \nSexo: {self.sexo}"
 
 class Asignatura:
-    def __init__(self, nombre, creditos, curso):
+    def __init__(self, nombre, codigo, creditos, curso):
         self.nombre = nombre
-        self.creditos = creditos # Atributos adicionales que no pide pero son coherentes en el contexto.
+        self.codigo = codigo
+        self.creditos = creditos 
         self.curso = curso
         
     def __str__(self):
-        return f"Asignatura: {self.nombre} \nCréditos: {self.creditos} \nCurso: {self.curso}"
+        return f"Asignatura: {self.nombre} \nCódigo: {self.codigo} \nCréditos: {self.creditos} \nCurso: {self.curso}"
 
 
 class Profesor(Persona):
     def __init__(self, nombre, DNI, direccion, sexo, departamento):
-        if departamento not in ["DIIC", "DITEC", "DIS"]: # Aquí metemos la restricción con los departamentos que nos da el enunciado.
-            raise ValueError("El Departamento debe ser uno de los siguientes: DIIC, DITEC o DIS") # Control de errrores.
-        else:
-            self.departamento = departamento
-        
         super().__init__(nombre, DNI, direccion, sexo)
-        self.asignaturas_impartidas = []
+        self.asignaturas_impartidas = set() # Cambio de lista a set para que no aparezcan elementos repetidos si imparten una asignatura dos veces sin querer.
+        self.departamento = departamento
     
     def impartir_asignatura(self, asignatura):
-        self.asignaturas_impartidas.append(asignatura)
+        self.asignaturas_impartidas.add(asignatura)
 
     def dejar_impartir_asignatura(self, asignatura):
-        self.asignaturas_impartidas.remove(asignatura)
+        if asignatura in self.asignaturas_impartidas:
+            self.asignaturas_impartidas.remove(asignatura)
+        else:
+            raise ValueError("La asignatura no se encuentra entre las impartidas.")
 
     def cambiar_departamento(self, nuevo_departamento):
-        if nuevo_departamento in ["DIIC", "DITEC", "DIS"]:
-            self.departamento = nuevo_departamento
-        else:
-            raise ValueError("El Departamento debe ser uno de los siguientes: DIIC, DITEC o DIS") # COontrol de eerrores y dominio como antes.
+        self.departamento = nuevo_departamento
 
     def __str__(self):
         asignaturas = ', '.join([asig.nombre for asig in self.asignaturas_impartidas])
@@ -71,13 +69,16 @@ class ProfesorTitular(Profesor):
 class Estudiante(Persona):
     def __init__(self, nombre, DNI, direccion, sexo):
         super().__init__(nombre, DNI, direccion, sexo)
-        self.asignaturas_matriculadas = []
+        self.asignaturas_matriculadas = set()
     
     def agregar_asignatura_matriculada(self, asignatura):
-        self.asignaturas_matriculadas.append(asignatura)
+        self.asignaturas_matriculadas.add(asignatura)
 
     def eliminar_asignatura_matriculada(self, asignatura):
-        self.asignaturas_matriculadas.remove(asignatura)
+        if asignatura in self.asignaturas_matriculadas:
+            self.asignaturas_matriculadas.remove(asignatura)
+        else:
+            raise ValueError("La asignatura no se encuentra matriculada.")
 
     def __str__(self):
         asignaturas = ', '.join([asig.nombre for asig in self.asignaturas_matriculadas])
@@ -85,12 +86,12 @@ class Estudiante(Persona):
 
 # Ejemplo de uso
 prof_asociado = ProfesorAsociado("Juan", "12345", "Calle 123", "M", "DIIC")
-matematicas = Asignatura("Matemáticas", 5, "1º")
+matematicas = Asignatura("Matemáticas", 8484, 5, "1º")
 prof_asociado.impartir_asignatura(matematicas)
 print(prof_asociado.asignaturas_impartidas)
 
 prof_titular = ProfesorTitular("María", "54321", "Calle 456", "V", "DITEC", "area aleatoria")
-fisica = Asignatura("Física", 4, "2º")
+fisica = Asignatura("Física", 834, 4, "2º")
 prof_titular.impartir_asignatura(fisica)
 
 estudiante = Estudiante("Ana", "98765", "Calle 012", "V")
@@ -100,7 +101,8 @@ print(estudiante.asignaturas_matriculadas)
 
 
 
-# Código de prueba:
+
+# Código de prueba
 
 # Crear instancias de profesores titulares
 prof_titular_1 = ProfesorTitular("María", "54321", "Calle 456", "V", "DITEC", "Área de investigación 1")
@@ -118,19 +120,25 @@ estudiante_2 = Estudiante("Lucas", "23456", "Calle 456", "M")
 estudiante_3 = Estudiante("Marta", "34567", "Calle 789", "V")
 
 # Crear instancias de asignaturas
-asignatura_1 = Asignatura("Matemáticas", 5, "1º")
-asignatura_2 = Asignatura("Física", 4, "2º")
-asignatura_3 = Asignatura("Química", 3, "1º")
-asignatura_4 = Asignatura("Biología", 3, "2º")
-asignatura_5 = Asignatura("Historia", 2, "3º")
-asignatura_6 = Asignatura("Literatura", 2, "3º")
-asignatura_7 = Asignatura("Arte", 2, "4º")
-asignatura_8 = Asignatura("Música", 2, "4º")
-asignatura_9 = Asignatura("Programación", 4, "2º")
-asignatura_10 = Asignatura("Inglés", 3, "1º")
+asignatura_1 = Asignatura("Matemáticas", 82345, 5, "1º")
+asignatura_2 = Asignatura("Física", 423, 4, "2º")
+asignatura_3 = Asignatura("Química", 24, 3, "1º")
+asignatura_4 = Asignatura("Biología", 2342, 3, "2º")
+asignatura_5 = Asignatura("Historia", 1344, 2, "3º")
+asignatura_6 = Asignatura("Literatura", 1341, 2, "3º")
+asignatura_7 = Asignatura("Arte", 344, 2, "4º")
+asignatura_8 = Asignatura("Música", 1345, 2, "4º")
+asignatura_9 = Asignatura("Programación", 2355, 4, "2º")
+asignatura_10 = Asignatura("Inglés", 3542, 3, "1º")
 
 # Asignar asignaturas a cada profesor titular
 prof_titular_1.impartir_asignatura(asignatura_1)
+print(str(prof_titular_1))
+prof_titular_1.impartir_asignatura(asignatura_1)
+prof_titular_1.impartir_asignatura(asignatura_1)
+print(str(prof_titular_1))
+prof_titular_1.dejar_impartir_asignatura(asignatura_1)
+print(str(prof_titular_1))
 prof_titular_1.impartir_asignatura(asignatura_2)
 prof_titular_1.impartir_asignatura(asignatura_3)
 
