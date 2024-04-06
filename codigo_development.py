@@ -1,86 +1,58 @@
-# Versión 2
+# Versión 3
 
+# En esta versión del código se cambia el planteamiento del enunciado y interpretamos de forma distinta el concepto de miembro de departamento
+# y de investigador, asumiendo que todos los investigadores son profesores titulares y estas dos clases se solapan completamente, y que todos los miembros de departamento son profesores.
 class Persona:
     def __init__(self, nombre, DNI, direccion, sexo):
-        # Aquí intentamos meter unas restricciones de dominio. Si no se cumplen, lanzaremos una excepción.
-        if not isinstance(nombre, str):
-            raise TypeError("El nombre debe ser un string.")
-        if not isinstance(DNI, str):
-            raise TypeError("El DNI debe ser un string.")
-        if not isinstance(direccion, str):
-            raise TypeError("La dirección debe ser un string.")
-        
         self.nombre = nombre
         self.DNI = DNI
         self.direccion = direccion
         self.sexo = sexo
 
-    def get_sexo(self):
-        return self._sexo
-
-    def set_sexo(self, value):
-        if value.upper() not in ['V', 'M']:
-            raise ValueError("El sexo debe ser 'V' o 'M'.")
-        self._sexo = value.upper()
-
-    sexo = property(get_sexo, set_sexo)
-
-    
-
-class MiembroDepartamento:
-    def __init__(self, departamento):
+class Profesor(Persona):
+    def __init__(self, nombre, DNI, direccion, sexo, departamento):
+        super().__init__(nombre, DNI, direccion, sexo)
+        self.asignaturas_impartidas = []
         self.departamento = departamento
     
-    def cambiarDepartamento(self, nuevoDepartamento):
-        self.departamento = nuevoDepartamento
+    def impartir_asignatura(self, asignatura):
+        self.asignaturas_impartidas.append(asignatura)
 
-class Profesor(Persona):
-    def __init__(self, nombre, DNI, direccion, sexo):
-        super().__init__(nombre, DNI, direccion, sexo)
-        self.asignaturasImpartidas = []
+    def dejar_impartir_asignatura(self, asignatura):
+        self.asignaturas_impartidas.remove(asignatura)
 
-class ProfesorAsociado(MiembroDepartamento, Profesor):
+    def cambiar_departamento(self, nuevo_departamento):
+        self.departamento = nuevo_departamento
+
+class ProfesorAsociado(Profesor):
     def __init__(self, nombre, DNI, direccion, sexo, departamento):
         Persona.__init__(self, nombre, DNI, direccion, sexo)
-        MiembroDepartamento.__init__(self, departamento)
-        Profesor.__init__(self, nombre, DNI, direccion, sexo)
-    
-    def impartirAsignatura(self, asignatura):
-        self.asignaturasImpartidas.append(asignatura)
+        Profesor.__init__(self, nombre, DNI, direccion, sexo, departamento)
 
-class ProfesorTitular(MiembroDepartamento, Profesor):
-    def __init__(self, nombre, DNI, direccion, sexo, departamento):
+class ProfesorTitular(Profesor):
+    def __init__(self, nombre, DNI, direccion, sexo, departamento, area_investigador):
         Persona.__init__(self, nombre, DNI, direccion, sexo)
-        MiembroDepartamento.__init__(self, departamento)
-        Profesor.__init__(self, nombre, DNI, direccion, sexo)
-    
-    def impartirAsignatura(self, asignatura):
-        self.asignaturasImpartidas.append(asignatura)
-    
-    def asignarRolInvestigador(self):
-        print("Asignando rol de investigador")
-
-class Investigador(Persona, MiembroDepartamento):
-    def __init__(self, nombre, DNI, direccion, sexo, departamento, areaInvestigacion):
-        Persona.__init__(self, nombre, DNI, direccion, sexo)
-        MiembroDepartamento.__init__(self, departamento)
-        self.areaInvestigacion = areaInvestigacion
+        Profesor.__init__(self, nombre, DNI, direccion, sexo, departamento)
+        self.area_investigador = area_investigador
 
 class Estudiante(Persona):
     def __init__(self, nombre, DNI, direccion, sexo):
         super().__init__(nombre, DNI, direccion, sexo)
-        self.asignaturasMatriculadas = []
+        self.asignaturas_matriculadas = []
+    
+    def agregar_asignatura_matriculada(self, asignatura):
+        self.asignaturas_matriculadas.append(asignatura)
+
+    def eliminar_asignatura_matriculada(self, asignatura):
+        self.asignaturas_matriculadas.remove(asignatura)
 
 # Ejemplo de uso
-prof_asociado = ProfesorAsociado("Juan", "12345", "Calle 123", "M", "DIIC")
-prof_asociado.impartirAsignatura("Matemáticas")
-print(prof_asociado.asignaturasImpartidas)
+prof_asociado = ProfesorAsociado(85, "12345", "Calle 123", "M", "DIIC")
+prof_asociado.impartir_asignatura("Matemáticas")
+print(prof_asociado.asignaturas_impartidas)
 
-prof_titular = ProfesorTitular("María", "54321", "Calle 456", "V", "DITEC")
-prof_titular.impartirAsignatura("Física")
-prof_titular.asignarRolInvestigador()
+prof_titular = ProfesorTitular("María", "54321", "Calle 456", "V", "DITEC", "area aleatoria")
+prof_titular.impartir_asignatura("Física")
 
-investigador = Investigador("Carlos", "67890", "Calle 789", "M", "DIS", "Inteligencia Artificial")
-print(investigador.areaInvestigacion)
 
 estudiante = Estudiante("Ana", "98765", "Calle 012", "V")
